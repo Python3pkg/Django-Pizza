@@ -147,11 +147,11 @@ class PageAdmin (admin.ModelAdmin):
     return response
     
   def convert_image_objects (self, context):
-    for key, value in context.items():
+    for key, value in list(context.items()):
       if hasattr(value, 'jdict'):
         context[key] = value.jdict()
         
-      elif type(value) in [types.ListType, types.TupleType]:
+      elif type(value) in [list, tuple]:
         temp = []
         for item in value:
           item = self.convert_image_objects(item)
@@ -226,7 +226,7 @@ class PageAdmin (admin.ModelAdmin):
   def save_model (self, request, obj, form, change):
     if hasattr(request, 'version') and request.version:
       cdict = {}
-      for key in form.cleaned_data.keys():
+      for key in list(form.cleaned_data.keys()):
         if key.startswith('generatedfield_'):
           if hasattr(form.cleaned_data[key], 'id'):
             cdict[key[15:]] = form.cleaned_data[key].id
@@ -270,7 +270,7 @@ class PageAdmin (admin.ModelAdmin):
     instances = sorted(instances, key=lambda x: x.cleaned_data['icnt'])
     for inline in instances:
       d = {}
-      for ikey, value in inline.cleaned_data.items():
+      for ikey, value in list(inline.cleaned_data.items()):
         if ikey.startswith('generatedfield_'):
           if hasattr(value, 'id'):
             d[ikey[15:]] = value.id
@@ -342,7 +342,7 @@ class PageAdmin (admin.ModelAdmin):
           del init['generatedfield_iid']
           init_post[param] = str(iobj.id)
           
-          for k, value in init.items():
+          for k, value in list(init.items()):
             param = '%s-%d-%s' % (prefix, i, k)
             init_post[param] = value
             

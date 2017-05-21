@@ -136,7 +136,7 @@ class EventAdmin (AdminMixin, admin.ModelAdmin):
       self.save_new_series(request, form.instance, form)
       
   def update_series (self, request, obj, form):
-    if form.cleaned_data.has_key('update') and form.cleaned_data['update'] == 'all':
+    if 'update' in form.cleaned_data and form.cleaned_data['update'] == 'all':
       if obj.series:
         obj.series.title = obj.title
         obj.series.save()
@@ -147,7 +147,7 @@ class EventAdmin (AdminMixin, admin.ModelAdmin):
           copy_inlines(obj, updobj)
           
   def save_new_series (self, request, obj, form):
-    if form.cleaned_data.has_key('repeat') and form.cleaned_data['repeat'] != 'none':
+    if 'repeat' in form.cleaned_data and form.cleaned_data['repeat'] != 'none':
       delta = None
       end_delta = None
       if obj.series is None:

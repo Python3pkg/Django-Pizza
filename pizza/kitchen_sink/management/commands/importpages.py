@@ -9,7 +9,7 @@ from pizza.kitchen_sink.models import Page, Version, Image, Inline
 
 def yes_no (message):
   while 1:
-    ans = raw_input(message + ' [y/n]: ')
+    ans = input(message + ' [y/n]: ')
     if ans.lower() in ['y', 'n']:
       if ans.lower() == 'y':
         return True
@@ -20,19 +20,19 @@ def yes_no (message):
   
 def choose_page (page, pages):
   choices = {'0': None}
-  print "Choose a page to overwrite for {} - {}".format(page['url'], page['sites_list'])
-  print "0: Create New Page"
+  print("Choose a page to overwrite for {} - {}".format(page['url'], page['sites_list']))
+  print("0: Create New Page")
   
   count = 1
   for p in pages:
     choices[str(count)] = p
     sites = ", ".join(p.sites.all().values_list('name', flat=True))
-    print "{}: {} - {}".format(count, p.url, sites)
+    print("{}: {} - {}".format(count, p.url, sites))
     count += 1
     
   while 1:
-    ans = raw_input('Choice: ')
-    if ans in choices.keys():
+    ans = input('Choice: ')
+    if ans in list(choices.keys()):
       return choices[ans]
       
 def new_version (page, **kwargs):
@@ -51,8 +51,8 @@ def new_version (page, **kwargs):
     del v['keywords']
     del v['description']
     
-    for key, value in v.items():
-      if type(value) in [types.ListType, types.TupleType]:
+    for key, value in list(v.items()):
+      if type(value) in [list, tuple]:
         cnt = 0
         for item in value:
           inline = Inline(page=page, icnt=cnt)
@@ -67,8 +67,8 @@ def new_version (page, **kwargs):
   return None
   
 def convert_images (vdict, create_images):
-  for key, value in vdict.items():
-    if type(value) is types.DictType:
+  for key, value in list(vdict.items()):
+    if type(value) is dict:
       images = Image.objects.filter(file=value['name'])
       image = None
       
@@ -91,7 +91,7 @@ def convert_images (vdict, create_images):
       else:
         vdict[key] = image
         
-    elif type(value) in [types.ListType, types.TupleType]:
+    elif type(value) in [list, tuple]:
       items = []
       for item in value:
         item = convert_images(item, create_images)
@@ -110,7 +110,7 @@ class Command (BaseCommand):
     create_images = yes_no('Create and download images?')
     
     for jfile in args:
-      print 'Importing', jfile, '...'
+      print('Importing', jfile, '...')
       fh = open(jfile, 'r')
       data = json.loads(fh.read())
       fh.close()
@@ -120,7 +120,7 @@ class Command (BaseCommand):
         obj, created = Site.objects.get_or_create(name=site['name'], defaults={'domain': site['domain']})
         if created:
           if create_sites:
-            print 'Created Site:', obj.name
+            print('Created Site:', obj.name)
             obj.save()
             
           else:
@@ -142,7 +142,7 @@ class Command (BaseCommand):
         if page is None:
           page = Page(url=export['url'], tpl='narf')
           
-        print export['url'], '-', export['sites_list']
+        print(export['url'], '-', export['sites_list'])
         page.tpl = export['tpl']
         page.save()
         page.sites.clear()
@@ -154,5 +154,5 @@ class Command (BaseCommand):
         if version:
           version.save()
           
-      print 'Import Complete\n'
+      print('Import Complete\n')
       

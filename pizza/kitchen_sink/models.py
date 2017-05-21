@@ -1,6 +1,6 @@
 import datetime
-import cPickle as pickle
-import urllib
+import pickle as pickle
+import urllib.request, urllib.parse, urllib.error
 
 from django import forms
 from django.db import models
@@ -291,7 +291,7 @@ class Author (SitesMixin, models.Model):
   Thumbnail.allow_tags = True
   
 TEMPLATES = []
-for key, value in PIZZA_TEMPLATES.items():
+for key, value in list(PIZZA_TEMPLATES.items()):
   TEMPLATES.append((key, value['name']))
   
 class ModelForm (forms.ModelForm):
@@ -421,9 +421,9 @@ class Page (SitesMixin, models.Model):
       content = {}
       
     req = True
-    for cvar, props in regions.items():
+    for cvar, props in list(regions.items()):
       initial = None
-      if content.has_key(cvar):
+      if cvar in content:
         initial = content[cvar]
         
       fields['generatedfield_' + cvar] = self.form_field(*props, initial=initial, req=req)
@@ -438,7 +438,7 @@ class Page (SitesMixin, models.Model):
     classes = []
     if 'inlines' in PIZZA_TEMPLATES[self.tpl]:
       index = 0
-      for key, inline in PIZZA_TEMPLATES[self.tpl]['inlines'].items():
+      for key, inline in list(PIZZA_TEMPLATES[self.tpl]['inlines'].items()):
         iclass = admin.StackedInline
         iextra = 3
         imax_num = None
@@ -466,7 +466,7 @@ class Page (SitesMixin, models.Model):
           init_list = content[key]
           for icnt, init_dict in enumerate(init_list):
             idict = {'icnt': icnt + 1}
-            for ikey, value in init_dict.items():
+            for ikey, value in list(init_dict.items()):
               idict['generatedfield_' + ikey] = value
               
             init.append(idict)
@@ -495,7 +495,7 @@ class Page (SitesMixin, models.Model):
   
   def View_Published (self):
     edit_url = reverse('kitchen_sink:admin_editon')
-    goto = urllib.quote('//' + self.domain() + self.url + '?preview=1')
+    goto = urllib.parse.quote('//' + self.domain() + self.url + '?preview=1')
     data = {'url': self.url, 'edit': edit_url, 'goto': goto, 'domain': self.domain()}
     return '<a href="//%(domain)s%(url)s" target="_blank">View</a>&nbsp; -&nbsp;<a href="%(edit)s?goto=%(goto)s" target="_blank">Edit on Site</a>' % data
     
@@ -537,8 +537,8 @@ class Version (models.Model):
   
   def get_context (self):
     c = self.get_content()
-    for cvar, props in PIZZA_TEMPLATES[self.page.tpl]['regions'].items():
-      if props[0] == 'image' and c.has_key(cvar) and c[cvar]:
+    for cvar, props in list(PIZZA_TEMPLATES[self.page.tpl]['regions'].items()):
+      if props[0] == 'image' and cvar in c and c[cvar]:
         try:
           c[cvar] = Image.objects.get(id=c[cvar])
           
@@ -546,12 +546,12 @@ class Version (models.Model):
           pass
           
     if 'inlines' in PIZZA_TEMPLATES[self.page.tpl]:
-      for inline, idict in PIZZA_TEMPLATES[self.page.tpl]['inlines'].items():
+      for inline, idict in list(PIZZA_TEMPLATES[self.page.tpl]['inlines'].items()):
         if inline in c:
           for i in range(0, len(c[inline])):
-            for cvar, props in idict['regions'].items():
+            for cvar, props in list(idict['regions'].items()):
               myc = c[inline][i]
-              if props[0] == 'image' and myc.has_key(cvar) and myc[cvar]:
+              if props[0] == 'image' and cvar in myc and myc[cvar]:
                 try:
                   myc[cvar] = Image.objects.get(id=myc[cvar])
                   

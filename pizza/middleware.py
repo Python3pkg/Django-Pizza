@@ -1,6 +1,6 @@
 import re
-import urlparse
-import urllib
+import urllib.parse
+import urllib.request, urllib.parse, urllib.error
 
 from django import http
 from django.conf import settings
@@ -23,7 +23,7 @@ class Siteware (object):
   def get_sites (self):
     ret = cache.get(PIZZA_SITES_KEY)
     if ret is None:
-      ret = Site.objects.all().values()
+      ret = list(Site.objects.all().values())
       cache.set(PIZZA_SITES_KEY, ret)
       
     return ret
@@ -31,7 +31,7 @@ class Siteware (object):
   def default_site (self):
     ret = cache.get(PIZZA_DEFAULT_SITE_KEY)
     if ret is None:
-      ret = Site.objects.filter(id=settings.SITE_ID).values()[0]
+      ret = list(Site.objects.filter(id=settings.SITE_ID).values())[0]
       cache.set(PIZZA_DEFAULT_SITE_KEY, ret)
       
     return ret
@@ -61,13 +61,13 @@ class RememberAdminQuery:
             url = request.path + '?_popup=1'
             t = request.REQUEST.get('t', '')
             if t:
-              url += '&t=' + urllib.quote(t)
+              url += '&t=' + urllib.parse.quote(t)
               
             return http.HttpResponseRedirect(url)
             
           return http.HttpResponseRedirect(request.path)
           
-        qsdict = urlparse.parse_qs(request.META['QUERY_STRING'])
+        qsdict = urllib.parse.parse_qs(request.META['QUERY_STRING'])
         for k in ('t', 'pop'):
           try:
             del qsdict[k]
@@ -75,7 +75,7 @@ class RememberAdminQuery:
           except:
             pass
             
-        if len(qsdict.keys()) > 0:
+        if len(list(qsdict.keys())) > 0:
           request.session[key] = request.META['QUERY_STRING']
           
         else:

@@ -87,7 +87,7 @@ def cached_method (target):
 def update_attrs (obj, clone, exclude=[]):
   for f in obj._meta.fields:
     if f.name not in exclude:
-      if not isinstance(f, models.AutoField) and not isinstance(f, models.OneToOneField) and not f in obj._meta.parents.values():
+      if not isinstance(f, models.AutoField) and not isinstance(f, models.OneToOneField) and not f in list(obj._meta.parents.values()):
         setattr(clone, f.name, getattr(obj, f.name))
         
   clone.save()
@@ -99,7 +99,7 @@ def copy_inlines (obj, newobj):
 def copy_model_instance (obj):
   initial = {}
   for f in obj._meta.fields:
-    if not isinstance(f, models.AutoField) and not isinstance(f, models.OneToOneField) and not f in obj._meta.parents.values():
+    if not isinstance(f, models.AutoField) and not isinstance(f, models.OneToOneField) and not f in list(obj._meta.parents.values()):
       initial[f.name] = getattr(obj, f.name)
       
   return obj.__class__(**initial)
